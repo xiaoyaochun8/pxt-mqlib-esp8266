@@ -75,16 +75,32 @@ namespace mqlib {
     //% subcategory="esp8266"
     //% group='esp8266'
     //% block
-    export function Esp8266AtTcpSendData(s: string) {
+    export function Esp8266AtTcpSendData(s: string, handle: Function) {
         let len = s.length
         Esp8266SendAT("AT+CIPSEND=" + len + 2)
         Esp8266SendAT(s)
+        handle()
     }
     //% subcategory="esp8266"
     //% group='esp8266'
     //% block
-    export function Esp8266AtTcpClose(s: string) {
+    export function Esp8266AtTcpClose() {
         Esp8266SendAT("AT+CIPClose")
     }
 
+
+    //% subcategory="esp8266"
+    //% group='esp8266'
+    //% block
+    export function Esp8266AtQuick(s: string) {
+        let handle = function () {
+            let str = serial.readString()
+        }
+        Esp8266AtWifiSetMode(1)
+        Esp8266AtWifiConnect('redmi', '123456')
+        Esp8266AtTcpConnectServer('192.168.1.2', '80')
+        Esp8266AtTcpSendData('abc', handle)
+        Esp8266AtTcpClose()
+        Esp8266AtWifiUnConnect()
+    }
 }
