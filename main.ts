@@ -17,60 +17,60 @@ namespace mqlib {
     //% subcategory="esp8266"
     //% group='esp8266'
     //% block
-    export function Esp8266AtTest() {
-        Esp8266SendAT("AT")
+    export function Esp8266AtTest(wait: number = 100) {
+        Esp8266SendAT("AT", wait)
     }
     //% subcategory="esp8266"
     //% group='esp8266'
     //% block
-    export function Esp8266AtReset() {
-        Esp8266SendAT("AT+RST")
+    export function Esp8266AtReset(wait: number = 100) {
+        Esp8266SendAT("AT+RST", wait)
     }
     //% subcategory="esp8266"
     //% group='esp8266'
     //% block
-    export function Esp8266AtVersion() {
-        Esp8266SendAT("AT+GMR")
+    export function Esp8266AtVersion(wait: number = 100) {
+        Esp8266SendAT("AT+GMR", wait)
     }
     //% subcategory="esp8266"
     //% group='esp8266'
     //% block
-    export function Esp8266AtRestore() {
-        Esp8266SendAT("AT+RESTORE")
+    export function Esp8266AtRestore(wait: number = 100) {
+        Esp8266SendAT("AT+RESTORE", wait)
     }
 
     // WIFI指令
     //% subcategory="esp8266"
     //% group='esp8266'
     //% block
-    export function Esp8266AtWifiSetMode(i:number) {
-        Esp8266SendAT("AT+CWMODE="+i)
+    export function Esp8266AtWifiSetMode(i: number, wait: number = 100) {
+        Esp8266SendAT("AT+CWMODE=" + i, wait)
     }
     //% subcategory="esp8266"
     //% group='esp8266'
     //% block
-    export function Esp8266AtWifiConnect(name: string, pw: string) {
-        Esp8266SendAT("AT+CWJAP=" + name + "," + pw)
+    export function Esp8266AtWifiConnect(name: string, pw: string, wait: number = 100) {
+        Esp8266SendAT("AT+CWJAP=" + name + "," + pw, wait)
     }
     //% subcategory="esp8266"
     //% group='esp8266'
     //% block
-    export function Esp8266AtWifiUnConnect() {
-        Esp8266SendAT("AT+CWQAP")
+    export function Esp8266AtWifiUnConnect(wait: number = 100) {
+        Esp8266SendAT("AT+CWQAP", wait)
     }
 
     // TCP/UDP指令
     //% subcategory="esp8266"
     //% group='esp8266'
     //% block
-    export function Esp8266AtTcpSetConnectNum(i: number) {
-        Esp8266SendAT("AT+CIPMUX=" + i)
+    export function Esp8266AtTcpSetConnectNum(i: number, wait: number = 100) {
+        Esp8266SendAT("AT+CIPMUX=" + i, wait)
     }
     //% subcategory="esp8266"
     //% group='esp8266'
     //% block
-    export function Esp8266AtTcpConnectServer(ip: string, port: string) {
-        Esp8266SendAT("AT+CIPSTART=TCP," + ip + "," + port)
+    export function Esp8266AtTcpConnectServer(ip: string, port: string, wait: number = 100) {
+        Esp8266SendAT("AT+CIPSTART=TCP," + ip + "," + port, wait)
     }
     //% subcategory="esp8266"
     //% group='esp8266'
@@ -78,14 +78,14 @@ namespace mqlib {
     export function Esp8266AtTcpSendData(s: string, handle: Function) {
         let len = s.length
         Esp8266SendAT("AT+CIPSEND=" + len + 2)
-        Esp8266SendAT(s)
+        Esp8266SendAT(s, 0)
         handle()
     }
     //% subcategory="esp8266"
     //% group='esp8266'
     //% block
-    export function Esp8266AtTcpClose() {
-        Esp8266SendAT("AT+CIPClose")
+    export function Esp8266AtTcpClose(wait: number = 100) {
+        Esp8266SendAT("AT+CIPClose", wait)
     }
 
 
@@ -103,9 +103,16 @@ namespace mqlib {
         // let handle = function () {
         //     let str = serial.readString()
         // }
+        serial.redirect(
+            SerialPin.P0,
+            SerialPin.P1,
+            BaudRate.BaudRate115200
+        )
+        Esp8266AtRestore(1000)
         Esp8266AtWifiSetMode(1)
-        Esp8266AtWifiConnect(name, pw)
-        Esp8266AtTcpConnectServer(ip, port)
+        Esp8266AtReset(1000)
+        Esp8266AtWifiConnect(name, pw, 0)
+        Esp8266AtTcpConnectServer(ip, port, 0)
         Esp8266AtTcpSendData(sendData, handle)
         Esp8266AtTcpClose()
         Esp8266AtWifiUnConnect()
