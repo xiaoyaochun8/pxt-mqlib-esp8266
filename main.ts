@@ -117,4 +117,36 @@ namespace mqlib {
         Esp8266AtTcpClose()
         Esp8266AtWifiUnConnect()
     }
+    //% subcategory="esp8266"
+    //% group='esp8266'
+    //% block
+    function waitResponse(): boolean {
+        let serial_str: string = ""
+        let result: boolean = false
+        let time: number = input.runningTime()
+        while (true) {
+            serial_str += serial.readString()
+            if (serial_str.length > 200) serial_str = serial_str.substr(serial_str.length - 200)
+            if (serial_str.includes("OK") || serial_str.includes("ALREADY CONNECTED")) {
+                result = true
+                break
+            } else if (serial_str.includes("ERROR") || serial_str.includes("SEND FAIL")) {
+                break
+            }
+            if (input.runningTime() - time > 30000) break
+        }
+        return result
+    }
+    //% subcategory="esp8266"
+    //% group='esp8266'
+    //% block
+    function waitResponse2(): string {
+        let serial_str: string = ""
+        let time: number = input.runningTime()
+        while (true) {
+            serial_str += serial.readString()
+            if (input.runningTime() - time > 30000) break
+        }
+        return serial_str
+    }
 }
