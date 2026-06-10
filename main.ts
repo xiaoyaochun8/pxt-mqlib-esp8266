@@ -112,8 +112,10 @@ namespace mqlib {
         Esp8266AtWifiSetMode(1)
         Esp8266AtReset(1000)
         Esp8266AtWifiConnect(name, pw, 0)
+        let wifiConnect = waitResponse()
         Esp8266AtTcpConnectServer(ip, port, 0)
         Esp8266AtTcpSendData(sendData, handle)
+        let tcpResult = waitResponse2()
         Esp8266AtTcpClose()
         Esp8266AtWifiUnConnect()
     }
@@ -145,7 +147,7 @@ namespace mqlib {
         let time: number = input.runningTime()
         while (true) {
             serial_str += serial.readString()
-            if (input.runningTime() - time > 30000) break
+            if (input.runningTime() - time > 5000) break
         }
         return serial_str
     }
