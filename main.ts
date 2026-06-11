@@ -112,17 +112,17 @@ namespace mqlib {
         Esp8266AtWifiSetMode(1)
         Esp8266AtReset(1000)
         Esp8266AtWifiConnect(name, pw, 0)
-        let wifiConnect = waitResponse()
+        let wifiConnect = Esp8266AtWaitResponse()
         Esp8266AtTcpConnectServer(ip, port, 0)
         Esp8266AtTcpSendData(sendData, handle)
-        let tcpResult = waitResponse2()
+        let tcpResult = Esp8266AtWaitResponse2()
         Esp8266AtTcpClose()
         Esp8266AtWifiUnConnect()
     }
     //% subcategory="esp8266"
     //% group='esp8266'
     //% block
-    function waitResponse(): boolean {
+    function Esp8266AtWaitResponse(): boolean {
         let serial_str: string = ""
         let result: boolean = false
         let time: number = input.runningTime()
@@ -142,7 +142,7 @@ namespace mqlib {
     //% subcategory="esp8266"
     //% group='esp8266'
     //% block
-    function waitResponse2(): string {
+    function Esp8266AtWaitResponse2(): string {
         let serial_str: string = ""
         let time: number = input.runningTime()
         while (true) {
