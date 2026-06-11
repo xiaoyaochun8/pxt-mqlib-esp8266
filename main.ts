@@ -122,7 +122,7 @@ namespace mqlib {
     //% subcategory="esp8266"
     //% group='esp8266'
     //% block
-    function Esp8266AtWaitResponse(): boolean {
+    export function Esp8266AtWaitResponse(): boolean {
         let serial_str: string = ""
         let result: boolean = false
         let time: number = input.runningTime()
@@ -142,7 +142,7 @@ namespace mqlib {
     //% subcategory="esp8266"
     //% group='esp8266'
     //% block
-    function Esp8266AtWaitResponse2(): string {
+    export function Esp8266AtWaitResponse2(): string {
         let serial_str: string = ""
         let time: number = input.runningTime()
         while (true) {
