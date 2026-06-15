@@ -151,4 +151,34 @@ namespace mqlib {
         }
         return serial_str
     }
+    
+    
+    let rxData = ""
+    //% subcategory="esp8266"
+    //% group='esp8266'
+    //% block
+    export function connectWifi() {
+        return 0
+    }
+    //% subcategory="esp8266"
+    //% group='esp8266'
+    //% block
+    export function sendData() {
+        rxData = 'abc'
+        return 0
+    }
+    //% subcategory="esp8266"
+    //% group='esp8266'
+    //% block
+    export function getResponse() {
+        return rxData;
+    }
+    //% subcategory="esp8266"
+    //% group='esp8266'
+    //% block
+    export function unConnect() {
+        //unConnectWifi
+        //unConnectServer
+        return 0;
+    }
 }
