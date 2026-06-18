@@ -44,18 +44,20 @@ namespace mqlib {
     //% subcategory="esp8266"
     //% group='esp8266'
     //% block
-    export function requestServerData(ip:string, port:string, netFunc: NetFunc) {
+    export function requestServerData(ip:string, port:string) {
         //reset state
         stateTcp = false
         stateTcpData = false
         rxData = ''
-        
+        if(!stateWifiConnected){
+            return
+        }
         //start request
         Esp8266SendAT('AT+CIPSTART="TCP","' + ip + '",' + port, 0) // connect to website server
         waitTcpResponse(1)
         basic.pause(100)
         //tcp-start
-        let str: string = "data=get,field1,0"
+        let str: string = "data=getts,data1,0"
         Esp8266SendAT("AT+CIPSEND=" + (str.length + 2))
         Esp8266SendAT(str, 0) // upload data
         //tcp-end
@@ -72,6 +74,12 @@ namespace mqlib {
         Esp8266SendAT("AT+CIPCLOSE")
         //basic.pause(1000)
     }
+    //% subcategory="esp8266"
+    //% group='esp8266'
+    //% block
+    export function getWifiState(){
+        return stateWifiConnected
+    }
 
     //% subcategory="esp8266"
     //% group='esp8266'
@@ -83,22 +91,28 @@ namespace mqlib {
     //% subcategory="esp8266"
     //% group='esp8266'
     //% block
-    //% id.min=1 id.max=8
+    //% id.min=1 id.max=4
     export function getServerDataById(id:number){
-        //check rxData
-        if(rxData && rxData != ''){
-            //check rsp
-            let aryBuf = rxData.split('=')
-            if(aryBuf[0] && aryBuf[0] == 'rsp'){
-                let aryData = aryBuf.split(',')
-                let val = aryData[id-1] || ''
-                return val
-            }else{
-                return 'tcp data err2'
-            }
-        }else{
-            return 'tcp data err'
+        if(!stateWifiConnected){
+            return '<wifi err>'
         }
+        if(!stateTcp){
+            return '<tcp err>'
+        }
+        if(!stateTcpData){
+            return '<tcp data err>'
+        }
+        if(!rxData || rxData == ''){
+            return '<rx data err>'
+        }
+        //check rsp
+        let aryBuf = rxData.split('=')
+        if(!aryBuf[0] || aryBuf[0] != 'rsp'){
+            return '<rsp data err>'
+        }
+        let aryData = aryBuf.split(',')
+        let val = aryData[id-1] || ''
+        return val
     }
     
     
