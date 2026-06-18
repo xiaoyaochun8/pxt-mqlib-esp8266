@@ -4,15 +4,6 @@
 //% groups=['esp8266']
 namespace mqlib {
 
-    // write AT command with CR+LF ending
-    //% subcategory="esp8266"
-    //% group='esp8266'
-    //% block
-    export function Esp8266SendAT(command: string, wait: number = 100) {
-        serial.writeString(command + "\u000D\u000A")
-        basic.pause(wait)
-    }
-
     // 基础指令
     //% subcategory="esp8266"
     //% group='esp8266'
@@ -151,34 +142,190 @@ namespace mqlib {
         }
         return serial_str
     }
+
+
+
+
+
+
+
+
+
+
+
+
+    /************************************************************/
+    
+    //% subcategory="esp8266"
+    //% group='esp8266'
+    //% block
+    export function connectWifi(ssid:string, pw:string) {
+        OLED12864_I2C.init(60)
+        OLED12864_I2C.clear()
+        OLED12864_I2C.showString('display')
+
+        serial.redirect(
+            SerialPin.P0,
+            SerialPin.P1,
+            BaudRate.BaudRate115200
+        )
+        serial.setRxBufferSize(180)
+        // Esp8266SendAT("AT+CWAUTOCONN=1")
+        // Esp8266SendAT("AT+CWRECONNCFG=1,1")
+        Esp8266SendAT("AT+RESTORE", 1000) // restore to factory settings
+        Esp8266SendAT("AT+CWMODE=1") // set to STA mode
+        Esp8266SendAT("AT+RST", 1000) // reset
+        // serial.readString()
+        Esp8266SendAT("AT+CWJAP=\"" + ssid + "\",\"" + pw + "\"", 0) // connect to Wifi router
+
+        basic.pause(100) //!!!
+        basic.pause(10000)
+    }
+    
+    //% subcategory="esp8266"
+    //% group='esp8266'
+    //% block
+    export function getServerData(ip:string, port:string) {
+        Esp8266SendAT('AT+CIPSTART="TCP","' + ip + '",' + port, 0) // connect to website server
+        waitTcpResponse(1)
+        basic.pause(100)
+        //tcp-start
+        let str: string = "data=get,field1,0"
+        Esp8266SendAT("AT+CIPSEND=" + (str.length + 2))
+        Esp8266SendAT(str, 0) // upload data
+        //tcp-end
+        //http-start
+        // const request = `GET /index.html HTTP/1.1\r\nHost: 192.168.2.162\r\nConnection: close\r\n\r\n`;
+        // Esp8266SendAT(`AT+CIPSEND=${request.length}`)
+        // Esp8266SendAT(request, 0) // upload data
+        //http-end
+        // serial.readString()
+        waitTcpDataResponse(1)
+        basic.pause(100)
+        Esp8266SendAT("AT+CIPCLOSE")
+        basic.pause(1000)
+    }
+
+    //% subcategory="esp8266"
+    //% group='esp8266'
+    //% block
+    export function disConnectWifi(){
+        basic.pause(100)
+        Esp8266SendAT("AT+CWQAP")
+    }
+
     
     
-    let rxData = ""
-    //% subcategory="esp8266"
-    //% group='esp8266'
-    //% block
-    export function connectWifi() {
-        return 0
+    
+    // write AT command with CR+LF ending
+    export function Esp8266SendAT(command: string, wait: number = 100) {
+        serial.writeString(command + "\u000D\u000A")
+        basic.pause(wait)
     }
-    //% subcategory="esp8266"
-    //% group='esp8266'
-    //% block
-    export function sendData() {
-        rxData = 'abc'
-        return 0
+    function waitWifiResponse(y: number): boolean {
+        let serial_str: string = ""
+        let result: boolean = false
+        let time: number = input.runningTime()
+        while (true) {
+            serial_str += serial.readString()
+            // if (serial_str.length > 200) serial_str = serial_str.substr(serial_str.length - 200)
+            if (serial_str.includes("WIFI CONNECTED")) {
+                result = true
+                OLED12864_I2C.showString('break2', 0, 0)
+                OLED12864_I2C.showString(serial_str, 0, y)
+                break
+            } else if (serial_str.includes("WIFI DISCONNECT")) {
+                OLED12864_I2C.showString('break3', 0, 0)
+                OLED12864_I2C.showString(serial_str, 0, y)
+                break
+            }
+            //  else if (serial_str.includes("ERROR") || serial_str.includes("SEND FAIL")) {
+            //     OLED12864_I2C.showString(serial_str, 0, y)
+            //     break
+            // }
+            if (input.runningTime() - time > 5000) {
+                OLED12864_I2C.showString('break', 0, 0)
+                OLED12864_I2C.showString(serial_str, 0, y)
+                break
+            }
+        }
+        OLED12864_I2C.clear()
+        OLED12864_I2C.showString('endWifi', 0, 0)
+        OLED12864_I2C.showString(serial_str, 0, y)
+        OLED12864_I2C.showString('#' + processTcpData(serial_str), 0, 7)
+        return result
     }
-    //% subcategory="esp8266"
-    //% group='esp8266'
-    //% block
-    export function getResponse() {
-        return rxData;
+    function waitTcpResponse(y: number): boolean {
+        let serial_str: string = ""
+        let result: boolean = false
+        let time: number = input.runningTime()
+        while (true) {
+            serial_str += serial.readString()
+            // if (serial_str.length > 200) serial_str = serial_str.substr(serial_str.length - 200)
+            // if (serial_str.includes("WIFI CONNECTED")) {
+            //     result = true
+            //     OLED12864_I2C.showString('break2', 0, 0)
+            //     OLED12864_I2C.showString(serial_str, 0, y)
+            //     break
+            // } else if (serial_str.includes("WIFI DISCONNECT")) {
+            //     OLED12864_I2C.showString('break3', 0, 0)
+            //     OLED12864_I2C.showString(serial_str, 0, y)
+            //     break
+            // }
+            //  else if (serial_str.includes("ERROR") || serial_str.includes("SEND FAIL")) {
+            //     OLED12864_I2C.showString(serial_str, 0, y)
+            //     break
+            // }
+            if (input.runningTime() - time > 5000) {
+                OLED12864_I2C.showString('break', 0, 0)
+                OLED12864_I2C.showString(serial_str, 0, y)
+                break
+            }
+        }
+        OLED12864_I2C.clear()
+        OLED12864_I2C.showString('endTcp', 0, 0)
+        OLED12864_I2C.showString(serial_str, 0, y)
+        OLED12864_I2C.showString('#' + processTcpData(serial_str), 0, 7)
+        return result
     }
-    //% subcategory="esp8266"
-    //% group='esp8266'
-    //% block
-    export function unConnect() {
-        //unConnectWifi
-        //unConnectServer
-        return 0;
+    function waitTcpDataResponse(y: number): boolean {
+        let serial_str: string = ""
+        let result: boolean = false
+        let time: number = input.runningTime()
+        while (true) {
+            serial_str += serial.readString()
+            // if (serial_str.length > 200) serial_str = serial_str.substr(serial_str.length - 200)
+            // if (serial_str.includes("WIFI CONNECTED")) {
+            //     result = true
+            //     OLED12864_I2C.showString('break2', 0, 0)
+            //     OLED12864_I2C.showString(serial_str, 0, y)
+            //     break
+            // } else if (serial_str.includes("WIFI DISCONNECT")) {
+            //     OLED12864_I2C.showString('break3', 0, 0)
+            //     OLED12864_I2C.showString(serial_str, 0, y)
+            //     break
+            // }
+            //  else if (serial_str.includes("ERROR") || serial_str.includes("SEND FAIL")) {
+            //     OLED12864_I2C.showString(serial_str, 0, y)
+            //     break
+            // }
+            if (input.runningTime() - time > 5000) {
+                OLED12864_I2C.showString('break', 0, 0)
+                OLED12864_I2C.showString(serial_str, 0, y)
+                break
+            }
+        }
+        OLED12864_I2C.clear()
+        OLED12864_I2C.showString('endTcpData', 0, 0)
+        OLED12864_I2C.showString(serial_str, 0, y)
+        OLED12864_I2C.showString('#' + processTcpData(serial_str), 0, 7)
+        return result
     }
+    function processTcpData(inputStr: string): string {
+        let ary = inputStr.split(':')
+        let tmp = ary[1].replaceAll("\r", "").replaceAll("\n", "")
+            .replaceAll('[', '').replaceAll(']', '').replaceAll('CLOSED', '')
+        return tmp
+    }
+
 }

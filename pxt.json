@@ -5,7 +5,8 @@
     "dependencies": {
         "core": "*",
         "radio": "*",
-        "microphone": "*"
+        "microphone": "*",
+        "OLED12864_I2C": "github:xiaoyaochun8/OLED12864_I2C#c3029e3b92881aa52c4060681747dd85167a2412"
     },
     "files": [
         "README.md",
