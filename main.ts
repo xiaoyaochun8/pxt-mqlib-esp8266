@@ -5,6 +5,9 @@
 namespace mqlib {
 
     let stateWifiConnected = false
+    let stateTcp = false
+    let stateTcpData = false
+    let rxData = ''
     
     export enum NetFunc{
         //% block="测试"
@@ -41,7 +44,13 @@ namespace mqlib {
     //% subcategory="esp8266"
     //% group='esp8266'
     //% block
-    export function getServerData(ip:string, port:string, netFunc: NetFunc) {
+    export function requestServerData(ip:string, port:string, netFunc: NetFunc) {
+        //reset state
+        stateTcp = false
+        stateTcpData = false
+        rxData = ''
+        
+        //start request
         Esp8266SendAT('AT+CIPSTART="TCP","' + ip + '",' + port, 0) // connect to website server
         waitTcpResponse(1)
         basic.pause(100)
@@ -50,11 +59,13 @@ namespace mqlib {
         Esp8266SendAT("AT+CIPSEND=" + (str.length + 2))
         Esp8266SendAT(str, 0) // upload data
         //tcp-end
+        
         //http-start
         // const request = `GET /index.html HTTP/1.1\r\nHost: 192.168.2.162\r\nConnection: close\r\n\r\n`;
         // Esp8266SendAT(`AT+CIPSEND=${request.length}`)
         // Esp8266SendAT(request, 0) // upload data
         //http-end
+        
         // serial.readString()
         waitTcpDataResponse(1)
         basic.pause(100)
@@ -69,7 +80,26 @@ namespace mqlib {
         basic.pause(100)
         Esp8266SendAT("AT+CWQAP")
     }
-    
+    //% subcategory="esp8266"
+    //% group='esp8266'
+    //% block
+    //% id.min=1 id.max=8
+    export function getServerDataById(id:number){
+        //check rxData
+        if(rxData && rxData != ''){
+            //check rsp
+            let aryBuf = rxData.split('=')
+            if(aryBuf[0] && aryBuf[0] == 'rsp'){
+                let aryData = aryBuf.split(',')
+                let val = aryData[id-1] || ''
+                return val
+            }else{
+                return 'tcp data err2'
+            }
+        }else{
+            return 'tcp data err'
+        }
+    }
     
     
     // write AT command with CR+LF ending
@@ -97,6 +127,7 @@ namespace mqlib {
                 break
             }
         }
+        stateWifiConnected = true
         return result
     }
     function waitTcpResponse(y: number): boolean {
@@ -119,6 +150,7 @@ namespace mqlib {
                 break
             }
         }
+        stateTcp = true
         return result
     }
     function waitTcpDataResponse(y: number): boolean {
@@ -141,6 +173,8 @@ namespace mqlib {
                 break
             }
         }
+        rxData = processTcpData(serial_str)
+        stateTcpData = true
         return result
     }
     function processTcpData(inputStr: string): string {
