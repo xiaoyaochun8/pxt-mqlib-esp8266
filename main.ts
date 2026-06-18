@@ -155,6 +155,16 @@ namespace mqlib {
 
 
     /************************************************************/
+    let stateWifiConnected = false
+    
+    export enum NetFunc{
+        //% block="测试"
+        test,
+        //% block="获取时间"
+        gettime,
+        //% block="获取ts数据"
+        getts
+    }
     
     //% subcategory="esp8266"
     //% group='esp8266'
@@ -180,12 +190,13 @@ namespace mqlib {
 
         basic.pause(100) //!!!
         basic.pause(10000)
+        stateWifiConnected = true
     }
     
     //% subcategory="esp8266"
     //% group='esp8266'
     //% block
-    export function getServerData(ip:string, port:string) {
+    export function getServerData(ip:string, port:string, netFunc: NetFunc) {
         Esp8266SendAT('AT+CIPSTART="TCP","' + ip + '",' + port, 0) // connect to website server
         waitTcpResponse(1)
         basic.pause(100)
@@ -203,7 +214,7 @@ namespace mqlib {
         waitTcpDataResponse(1)
         basic.pause(100)
         Esp8266SendAT("AT+CIPCLOSE")
-        basic.pause(1000)
+        //basic.pause(1000)
     }
 
     //% subcategory="esp8266"
