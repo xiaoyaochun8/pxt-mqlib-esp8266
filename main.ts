@@ -163,7 +163,7 @@ namespace mqlib {
             //  else if (serial_str.includes("ERROR") || serial_str.includes("SEND FAIL")) {
             //     break
             // }
-            if (input.runningTime() - time > 5000) {
+            if (input.runningTime() - time > 500) {
                 break
             }
         }
@@ -186,7 +186,7 @@ namespace mqlib {
             //  else if (serial_str.includes("ERROR") || serial_str.includes("SEND FAIL")) {
             //     break
             // }
-            if (input.runningTime() - time > 5000) {
+            if (input.runningTime() - time > 500) {
                 break
             }
         }
