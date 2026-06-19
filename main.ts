@@ -77,7 +77,7 @@ namespace mqlib {
     //% subcategory="esp8266"
     //% group='esp8266'
     //% block
-    export function getWifiState(){
+    export function getWifiState(): boolean{
         return stateWifiConnected
     }
 
@@ -91,8 +91,8 @@ namespace mqlib {
     //% subcategory="esp8266"
     //% group='esp8266'
     //% block
-    //% id.min=1 id.max=4
-    export function getServerDataById(id:number){
+    //% id.min=1 id.max=4 id.defl=1
+    export function getServerDataById(id:number): string{
         if(!stateWifiConnected){
             return '<wifi err>'
         }
