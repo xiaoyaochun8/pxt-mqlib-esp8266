@@ -110,7 +110,10 @@ namespace mqlib {
         if(!aryBuf[0] || aryBuf[0] != 'rsp'){
             return '<rsp data err>'
         }
-        let aryData = aryBuf.split(',')
+        if (!aryBuf[1]) {
+            return '<rsp data err2>'
+        }
+        let aryData = aryBuf[1].split(',')
         let val = aryData[id-1] || ''
         return val
     }
